@@ -29,14 +29,11 @@ export const offerFormSchema = [
         id: "kasa",
         title: "02-KASA/KUVET İLE İLGİLİ BİLGİLER",
         fields: [
-            { name: "hacim", label: "Hacim", type: "text" }, // m3
+            { name: "hacim", label: "Hacim", type: "select", options: ["18 m³", "19 m³", "20 m³", "22 m³", "18+2 m³", "19+2 m³", "20+2 m³", "22+2 m³"] },
             { name: "kasaUzunlugu", label: "Kasa Uzunluğu", type: "text" },
             { name: "kasaGenisligi", label: "Kasa Genişliği", type: "text" },
             { name: "kasaYuksekligi", label: "Kasa Yüksekliği", type: "text" },
-            { name: "yanDuvarSacKalinligi", label: "Kuvet Yan Duvar Sac Kalınlığı", type: "text" },
-            { name: "onDuvarSacKalinligi", label: "Kuvet Ön Duvar Duvar Sac Kalınlığı", type: "text" },
-            { name: "tabanSacKalinligi", label: "Kuvet Ön Taban Duvar Sac Kalınlığı", type: "text" }, // "Kuvet Ön Taban" yazılmış görselde, muhtemelen Taban
-            { name: "arkaKapakSacKalinligi", label: "Kuvet Arka Kapak Sac Kalınlığı", type: "text" },
+            { name: "sacKalinliklari", label: "Kuvet Sac Kalınlıkları (Yan - Ön - Taban - Arka)", type: "select", options: ["5 - 4 - 4 - 5 mm", "6 - 4 - 4 - 5 mm", "6 - 5 - 5 - 5 mm", "Diğer"] },
             { name: "damperSacMalzemesi", label: "Damper Kuvet Sacı Malzemesi", type: "select", options: ["Hardox", "MC700", "ST52", "ST37", "CrNi - 304 L", "Domex", "Docol"] },
             { name: "arkaKapakTipi", label: "Arka Kapak Tipi", type: "select", options: ["Mekanik", "Hidrolik"] },
             { name: "siperlik", label: "Siperlik", type: "select", options: ["Var", "Yok"] },

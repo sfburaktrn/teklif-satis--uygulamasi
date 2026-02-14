@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Offer {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 01-SİPARİŞ İLE İLGİLİ GENEL BİLGİLER
+  teklifNo           String
+  satisSorumlusu     String?
+  siparisCinsi       String?
+  musteriAdi         String
+  yurtIciDisi        String?
+  musteriTipi        String?
+  siparisAdeti       Int?
+  onayTarihi         DateTime?
+  talepTarihi        DateTime?
+  tipOnayDurumu      String?
+  tescilUlkesi       String?
+  sasiTipi           String?
+  ustYapiTipi        String?
+  teslimSekli        String?
+  kamyonMarkasi      String?
+  kamyonModeli       String?
+  kamyonTahrikSistemi String?
+  kamyonKabinTipi    String?
+  kamyonTeslimTarihi DateTime?
+  kamyonTalebi       String?
+
+  // 02-KASA/KUVET İLE İLGİLİ BİLGİLER
+  hacim                 String? // m3, select options
+  kasaUzunlugu          String?
+  kasaGenisligi         String?
+  kasaYuksekligi        String?
+  sacKalinliklari       String? // Combined thickness field
+  damperSacMalzemesi    String?
+  arkaKapakTipi         String?
+  siperlik              String?
+  emniyetKilitlemesi    String?
+  brandaTipi            String?
+  yagTanki              String?
+  yagTankiMarkasi       String?
+  silindirMarkasi       String?
+  silindirTipi          String?
+  kunekTipi             String?
+  govdeEtekSaci         String?
+
+  // 03-ŞASİ/YÜRÜYEN İLE İLGİLİ BİLGİLER
+  dingilMesafesi        String?
+  dingillerArasiMesafe  String?
+  besinciTekerYuksekligi String?
+  disUzunluk            String?
+  aracGenisligi         String?
+  aracYuksekligi        String?
+  dingilYuku            String?
+  kingpinKapasitesi     String?
+  mekanikAyak           String?
+  elektrikSistemi       String?
+  tampon                String?
+  dingilMarkasi         String?
+  dingilSayisi          String?
+  dingilKaldirma        String?
+  dingilKaldirmaKumandasi String?
+  frenSistemi           String?
+  frenSistemiMarkasi    String?
+  guvenlikFrenFonksiyonu String?
+  lastikMarkasi         String?
+  lastikEbadi           String?
+  toplamLastikJantAdeti String?
+  jantMarkasi           String?
+  jantTipi              String?
+  stepneTasiyiciTipi    String?
+  camurlukTipi          String?
+  camurlukMarkasi       String?
+
+  // 04-DİĞER ÖZELLİKLER
+  yanginDolabi          String?
+  dolapTipi             String?
+  suDeposu              String?
+  isaretveLevhalar      String?
+  merdiven              String?
+  orjinalPto            String?
+  hidrolikPompa         String?
+  dengeKolu             String?
+  cekiSeti              String?
+  sasiRengi             String?
+  damperKuvetRengi      String?
+  brandaRengi           String?
+  logo                  String?
+  uyariEtiketDili       String?
+
+  // Additional Fields
+  ozelNotlar            String?
+}

@@ -45,6 +45,7 @@ export function Sidebar() {
                         <Link
                             key={item.href}
                             href={item.href}
+                            suppressHydrationWarning
                             className={cn(
                                 "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors hover:bg-slate-800",
                                 isActive ? "bg-slate-800 text-blue-400" : "text-slate-400"

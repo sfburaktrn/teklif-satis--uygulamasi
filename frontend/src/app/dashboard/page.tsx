@@ -13,12 +13,12 @@ export default function DashboardPage() {
                     </p>
                 </div>
 
-                <Link href="/dashboard/offers/create">
-                    <Button size="lg" className="h-16 px-8 text-lg gap-2 bg-blue-600 hover:bg-blue-700">
+                <Button asChild size="lg" className="h-16 px-8 text-lg gap-2 bg-blue-600 hover:bg-blue-700">
+                    <Link href="/dashboard/offers/create">
                         <Plus className="h-6 w-6" />
                         YENİ TEKLİF OLUŞTUR
-                    </Button>
-                </Link>
+                    </Link>
+                </Button>
             </div>
         </div>
     );

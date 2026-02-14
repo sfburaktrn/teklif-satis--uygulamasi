@@ -1,5 +1,7 @@
+"use client";
+
 import Link from "next/link";
-import { Plus, Search, Filter } from "lucide-react";
+import { Plus, Search, Filter, Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -10,42 +12,55 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+import { useEffect, useState } from "react";
+import api from "@/lib/api";
+import { format } from "date-fns";
+import { tr } from "date-fns/locale";
+import { toast } from "sonner";
 
-const mockOffers = [
-    {
-        id: "TK-2024-001",
-        customer: "ABC Lojistik A.Ş.",
-        date: "10.02.2024",
-        total: "€ 45.000,00",
-        status: "Onaylandı",
-    },
-    {
-        id: "TK-2024-002",
-        customer: "XYZ Nakliyat Ltd. Şti.",
-        date: "12.02.2024",
-        total: "€ 32.500,00",
-        status: "Bekliyor",
-    },
-    {
-        id: "TK-2024-003",
-        customer: "Mehmet Demir",
-        date: "13.02.2024",
-        total: "€ 28.000,00",
-        status: "Taslak",
-    },
-    {
-        id: "TK-2024-004",
-        customer: "Ayşe Yılmaz",
-        date: "14.02.2024",
-        total: "€ 55.000,00",
-        status: "Reddedildi",
-    },
-];
+interface Offer {
+    id: string;
+    teklifNo: string;
+    musteriAdi: string;
+    createdAt: string;
+    satisSorumlusu: string;
+    siparisAdeti: number;
+}
 
 export default function OffersPage() {
+    const [offers, setOffers] = useState<Offer[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchOffers = async () => {
+        try {
+            const response = await api.get("/offers");
+            setOffers(response.data);
+        } catch (error) {
+            console.error("Teklifler yüklenirken hata oluştu:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchOffers();
+    }, []);
+
+    const handleDelete = async (id: string) => {
+        if (confirm("Bu teklifi silmek istediğinize emin misiniz?")) {
+            try {
+                await api.delete(`/offers/${id}`);
+                toast.success("Teklif başarıyla silindi.");
+                fetchOffers(); // Refresh list
+            } catch (error) {
+                console.error("Silme işlemi başarısız:", error);
+                toast.error("Teklif silinirken bir hata oluştu.");
+            }
+        }
+    };
+
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 p-6">
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Teklifler</h1>
@@ -56,7 +71,7 @@ export default function OffersPage() {
                 <Link href="/dashboard/offers/create">
                     <Button>
                         <Plus className="mr-2 h-4 w-4" />
-                        Yeni Teklif
+                        Yeni Teklif Oluştur
                     </Button>
                 </Link>
             </div>
@@ -75,41 +90,62 @@ export default function OffersPage() {
                 </Button>
             </div>
 
-            <div className="rounded-md border bg-white">
+            <div className="rounded-md border bg-white shadow-sm">
                 <Table>
                     <TableHeader>
                         <TableRow>
                             <TableHead>Teklif No</TableHead>
                             <TableHead>Müşteri</TableHead>
-                            <TableHead>Tarih</TableHead>
-                            <TableHead>Tutar</TableHead>
-                            <TableHead>Durum</TableHead>
+                            <TableHead>Satış Sorumlusu</TableHead>
+                            <TableHead>Adet</TableHead>
+                            <TableHead>Oluşturulma Tarihi</TableHead>
                             <TableHead className="text-right">İşlemler</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {mockOffers.map((offer) => (
-                            <TableRow key={offer.id}>
-                                <TableCell className="font-medium">{offer.id}</TableCell>
-                                <TableCell>{offer.customer}</TableCell>
-                                <TableCell>{offer.date}</TableCell>
-                                <TableCell>{offer.total}</TableCell>
-                                <TableCell>
-                                    <Badge variant={
-                                        offer.status === "Onaylandı" ? "default" :
-                                            offer.status === "Bekliyor" ? "secondary" :
-                                                offer.status === "Reddedildi" ? "destructive" : "outline"
-                                    }>
-                                        {offer.status}
-                                    </Badge>
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    <Button variant="ghost" size="sm">
-                                        Detay
-                                    </Button>
+                        {loading ? (
+                            <TableRow>
+                                <TableCell colSpan={6} className="h-24 text-center">
+                                    <div className="flex items-center justify-center gap-2">
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        Yükleniyor...
+                                    </div>
                                 </TableCell>
                             </TableRow>
-                        ))}
+                        ) : offers.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                                    Henüz teklif bulunmuyor.
+                                </TableCell>
+                            </TableRow>
+                        ) : (
+                            offers.map((offer) => (
+                                <TableRow key={offer.id}>
+                                    <TableCell className="font-medium">{offer.teklifNo}</TableCell>
+                                    <TableCell>{offer.musteriAdi}</TableCell>
+                                    <TableCell>{offer.satisSorumlusu || "-"}</TableCell>
+                                    <TableCell>{offer.siparisAdeti || "-"}</TableCell>
+                                    <TableCell>
+                                        {format(new Date(offer.createdAt), "d MMMM yyyy", { locale: tr })}
+                                    </TableCell>
+                                    <TableCell className="text-right flex items-center justify-end gap-2">
+                                        <Link href={`/dashboard/offers/${offer.id}`}>
+                                            <Button variant="ghost" size="sm">
+                                                Detay
+                                            </Button>
+                                        </Link>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                            onClick={() => handleDelete(offer.id)}
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        )}
                     </TableBody>
                 </Table>
             </div>

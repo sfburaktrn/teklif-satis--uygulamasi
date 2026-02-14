@@ -35,22 +35,92 @@ import { Calendar } from "@/components/ui/calendar";
 
 import { offerFormSchema } from "@/constants/offer-form-fields";
 
+import { useEffect } from "react";
+import api from "@/lib/api";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+
 const formSchema = z.object({
-    teklifNo: z.string().min(1, "Zorunlu"),
+    teklifNo: z.string().optional(),
     musteriAdi: z.string().min(1, "Zorunlu"),
 }).catchall(z.any());
 
-export default function OfferForm() {
+interface OfferFormProps {
+    initialData?: any;
+    isReadOnly?: boolean;
+}
+
+export default function OfferForm({ initialData, isReadOnly = false }: OfferFormProps) {
+    const router = useRouter();
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
-        defaultValues: {
-            teklifNo: "",
+        defaultValues: initialData || {
+            teklifNo: "OTOMATİK OLUŞTURULACAK",
             musteriAdi: "",
         },
     });
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values);
+    const yurtIciDisi = form.watch("yurtIciDisi");
+    const tescilUlkesi = form.watch("tescilUlkesi");
+
+    useEffect(() => {
+        if (yurtIciDisi === "Yurt İçi (Yi)") {
+            form.setValue("tescilUlkesi", "Türkiye");
+        } else if (yurtIciDisi === "Yurt Dışı (YD)" && tescilUlkesi === "Türkiye") {
+            form.setValue("tescilUlkesi", ""); // Clear selection if it was Türkiye
+        }
+    }, [yurtIciDisi, form, tescilUlkesi]);
+
+    // Initial offer number fetch
+    useEffect(() => {
+        // Only fetch if creating new offer (no initialData)
+        if (!initialData && !isReadOnly) {
+            const fetchNextNumber = async () => {
+                try {
+                    const res = await api.get("/offers/next-number");
+                    if (res.data) {
+                        form.setValue("teklifNo", res.data);
+                    }
+                } catch (error) {
+                    console.error("Teklif numarası alınamadı:", error);
+                }
+            };
+            fetchNextNumber();
+        }
+    }, [initialData, isReadOnly, form]);
+
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        try {
+            const sanitize = (val: any) => (val === "" ? undefined : val);
+
+            const payload = {
+                ...values,
+                siparisAdeti: values.siparisAdeti ? Number(values.siparisAdeti) : undefined,
+                onayTarihi: sanitize(values.onayTarihi) ? new Date(values.onayTarihi).toISOString() : undefined,
+                talepTarihi: sanitize(values.talepTarihi) ? new Date(values.talepTarihi).toISOString() : undefined,
+                kamyonTeslimTarihi: sanitize(values.kamyonTeslimTarihi) ? new Date(values.kamyonTeslimTarihi).toISOString() : undefined,
+            };
+
+            // Remove empty string values from payload to prevent backend errors
+            Object.keys(payload).forEach(key => {
+                if ((payload as any)[key] === "") {
+                    (payload as any)[key] = undefined;
+                }
+            });
+
+            if (initialData?.id) {
+                await api.patch(`/offers/${initialData.id}`, payload);
+                toast.success("Teklif güncellendi.");
+            } else {
+                await api.post("/offers", payload);
+                toast.success("Teklif başarıyla oluşturuldu.");
+            }
+
+            router.push("/dashboard/offers");
+        } catch (error) {
+            console.error("Teklif oluşturma hatası:", error);
+            toast.error("Teklif oluşturulurken bir hata oluştu.");
+        }
     }
 
     // Helper to find section by ID
@@ -69,84 +139,131 @@ export default function OfferForm() {
 
                 {/* Fields */}
                 <div className="flex flex-col">
-                    {section.fields.map((field) => (
-                        <div
-                            key={field.name}
-                            className={cn(
-                                "flex border-b border-black last:border-b-0",
-                                field.type === "textarea" ? "min-h-[100px]" : "h-8"
-                            )}
-                        >
-                            {/* Label Column */}
-                            <div className="w-[40%] bg-gray-200 border-r border-black flex items-center px-2 text-[10px] md:text-[11px] font-semibold text-black leading-tight shrink-0">
-                                {field.label}
-                            </div>
+                    {section.fields.map((field) => {
+                        // Filter options dynamically
+                        let options = field.options;
+                        if (field.name === "tescilUlkesi" && yurtIciDisi === "Yurt Dışı (YD)") {
+                            options = field.options?.filter(o => o !== "Türkiye");
+                        }
 
-                            {/* Input Column */}
-                            <div className="w-[60%] bg-white relative">
-                                <FormField
-                                    control={form.control}
-                                    name={field.name}
-                                    render={({ field: formField }) => (
-                                        <FormItem className="space-y-0 h-full w-full">
-                                            <FormControl>
-                                                {field.type === "select" ? (
-                                                    <Select
-                                                        onValueChange={formField.onChange}
-                                                        defaultValue={formField.value}
-                                                    >
-                                                        <FormControl>
-                                                            <SelectTrigger className="h-full w-full rounded-none border-0 focus:ring-0 px-2 text-xs shadow-none">
-                                                                <SelectValue placeholder="" />
-                                                            </SelectTrigger>
-                                                        </FormControl>
-                                                        <SelectContent>
+                        return (
+                            <div
+                                key={field.name}
+                                className={cn(
+                                    "flex border-b border-black last:border-b-0",
+                                    field.type === "textarea" ? "min-h-[100px]" : "h-8"
+                                )}
+                            >
+                                {/* Label Column */}
+                                <div className="w-[40%] bg-gray-200 border-r border-black flex items-center px-2 text-[10px] md:text-[11px] font-semibold text-black leading-tight shrink-0">
+                                    {field.label}
+                                </div>
+
+                                {/* Input Column */}
+                                <div className="w-[60%] bg-white relative">
+                                    <FormField
+                                        control={form.control}
+                                        name={field.name}
+                                        render={({ field: formField }) => (
+                                            <FormItem className="space-y-0 h-full w-full">
+                                                <FormControl>
+                                                    {field.type === "select" ? (
+                                                        <Select
+                                                            onValueChange={(value) => {
+                                                                formField.onChange(value);
+                                                                if (field.name === "hacim") {
+                                                                    const dimensions: Record<string, { l: string; w: string; h: string }> = {
+                                                                        "18 m³": { l: "8450", w: "2434", h: "1260" },
+                                                                        "19 m³": { l: "8450", w: "2434", h: "1320" },
+                                                                        "20 m³": { l: "8450", w: "2434", h: "1380" },
+                                                                        "22 m³": { l: "8450", w: "2434", h: "1500" },
+                                                                        "18+2 m³": { l: "8450", w: "2434", h: "1380" },
+                                                                        "19+2 m³": { l: "8450", w: "2434", h: "1500" },
+                                                                        "20+2 m³": { l: "8450", w: "2434", h: "1500" },
+                                                                        "22+2 m³": { l: "8450", w: "2434", h: "1600" },
+                                                                    };
+
+                                                                    const selected = dimensions[value];
+                                                                    if (selected) {
+                                                                        form.setValue("kasaUzunlugu", selected.l);
+                                                                        form.setValue("kasaGenisligi", selected.w);
+                                                                        form.setValue("kasaYuksekligi", selected.h);
+                                                                    }
+                                                                }
+                                                            }}
+                                                            value={formField.value}
+                                                        >
+                                                            <FormControl>
+                                                                <SelectTrigger className="h-full w-full rounded-none border-0 focus:ring-0 px-2 text-xs shadow-none">
+                                                                    <SelectValue placeholder="" />
+                                                                </SelectTrigger>
+                                                            </FormControl>
+                                                            <SelectContent>
+                                                                {options?.map((option) => (
+                                                                    <SelectItem key={option} value={option} className="text-xs">
+                                                                        {option}
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    ) : field.type === "date" ? (
+                                                        <div className="flex h-full w-full items-center">
+                                                            <Input
+                                                                type="date"
+                                                                className="h-full w-full rounded-none border-0 focus-visible:ring-0 px-2 text-xs bg-transparent shadow-none"
+                                                                {...formField}
+                                                                value={formField.value ?? ""}
+                                                            />
+                                                        </div>
+                                                    ) : field.type === "radio" ? (
+                                                        <RadioGroup
+                                                            onValueChange={formField.onChange}
+                                                            defaultValue={formField.value}
+                                                            className="flex h-full items-center space-x-3 px-2"
+                                                        >
                                                             {field.options?.map((option) => (
-                                                                <SelectItem key={option} value={option} className="text-xs">
-                                                                    {option}
-                                                                </SelectItem>
+                                                                <div key={option} className="flex items-center space-x-1">
+                                                                    <RadioGroupItem value={option} id={`${field.name}-${option}`} className="h-3 w-3 border-black text-black" />
+                                                                    <label htmlFor={`${field.name}-${option}`} className="text-[10px] whitespace-nowrap cursor-pointer">{option}</label>
+                                                                </div>
                                                             ))}
-                                                        </SelectContent>
-                                                    </Select>
-                                                ) : field.type === "date" ? (
-                                                    <div className="flex h-full w-full items-center">
+                                                        </RadioGroup>
+                                                    ) : field.type === "number" ? (
                                                         <Input
-                                                            type="date"
                                                             className="h-full w-full rounded-none border-0 focus-visible:ring-0 px-2 text-xs bg-transparent shadow-none"
                                                             {...formField}
+                                                            value={formField.value ?? ""}
+                                                            onChange={(e) => {
+                                                                const value = e.target.value;
+                                                                // Sadece rakam girilmesine izin ver
+                                                                if (/^\d*$/.test(value)) {
+                                                                    formField.onChange(value);
+                                                                }
+                                                            }}
+                                                            inputMode="numeric"
                                                         />
-                                                    </div>
-                                                ) : field.type === "radio" ? (
-                                                    <RadioGroup
-                                                        onValueChange={formField.onChange}
-                                                        defaultValue={formField.value}
-                                                        className="flex h-full items-center space-x-3 px-2"
-                                                    >
-                                                        {field.options?.map((option) => (
-                                                            <div key={option} className="flex items-center space-x-1">
-                                                                <RadioGroupItem value={option} id={`${field.name}-${option}`} className="h-3 w-3 border-black text-black" />
-                                                                <label htmlFor={`${field.name}-${option}`} className="text-[10px] whitespace-nowrap cursor-pointer">{option}</label>
-                                                            </div>
-                                                        ))}
-                                                    </RadioGroup>
-                                                ) : field.type === "textarea" ? (
-                                                    <Textarea
-                                                        className="w-full h-full rounded-none border-0 focus-visible:ring-0 p-2 text-xs resize-none bg-transparent shadow-none"
-                                                        {...formField}
-                                                    />
-                                                ) : (
-                                                    <Input
-                                                        className="h-full w-full rounded-none border-0 focus-visible:ring-0 px-2 text-xs bg-transparent shadow-none"
-                                                        {...formField}
-                                                    />
-                                                )}
-                                            </FormControl>
-                                        </FormItem>
-                                    )}
-                                />
+                                                    ) : field.type === "textarea" ? (
+                                                        <Textarea
+                                                            className="w-full h-full rounded-none border-0 focus-visible:ring-0 p-2 text-xs resize-none bg-transparent shadow-none"
+                                                            {...formField}
+                                                            value={formField.value ?? ""}
+                                                        />
+                                                    ) : (
+                                                        <Input
+                                                            className="h-full w-full rounded-none border-0 focus-visible:ring-0 px-2 text-xs bg-transparent shadow-none"
+                                                            {...formField}
+                                                            value={formField.value ?? ""}
+                                                            disabled={field.name === "teklifNo"}
+                                                        />
+                                                    )}
+                                                </FormControl>
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </div>
         );
@@ -180,7 +297,9 @@ export default function OfferForm() {
                         {/* Order No */}
                         <div className="flex items-center gap-2">
                             <span className="font-bold text-sm whitespace-nowrap">ORDER NO :</span>
-                            <div className="w-24 h-6 bg-transparent border-b border-white"></div>
+                            <div className="min-w-[120px] h-6 bg-transparent border-b border-white flex items-center justify-center font-mono text-sm px-2">
+                                {form.watch("teklifNo")}
+                            </div>
                         </div>
                     </div>
 
@@ -212,6 +331,7 @@ export default function OfferForm() {
                                             <Textarea
                                                 className="w-full h-full bg-transparent border-0 focus-visible:ring-0 resize-none p-2 text-sm z-10 relative"
                                                 {...field}
+                                                value={field.value ?? ""}
                                             />
                                         )}
                                     />
@@ -226,10 +346,12 @@ export default function OfferForm() {
                             <Printer className="mr-2 h-4 w-4" />
                             Yazdır
                         </Button>
-                        <Button type="submit" className="bg-blue-900 hover:bg-blue-800 text-white min-w-[200px]">
-                            <Save className="mr-2 h-4 w-4" />
-                            KAYDET VE OLUŞTUR
-                        </Button>
+                        {!isReadOnly && (
+                            <Button type="submit" className="bg-blue-900 hover:bg-blue-800 text-white min-w-[200px]">
+                                <Save className="mr-2 h-4 w-4" />
+                                {initialData ? "GÜNCELLE" : "KAYDET VE OLUŞTUR"}
+                            </Button>
+                        )}
                     </div>
 
                 </form>

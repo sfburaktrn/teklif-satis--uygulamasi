@@ -3,6 +3,6 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class AppService {
     getHello(): string {
-        return 'Hello World! Özünlü ERP Backend is running on NestJS!';
+        return 'Hello World from NestJS!';
     }
 }
