@@ -36,50 +36,60 @@ model Offer {
   kamyonTalebi       String?
 
   // 02-KASA/KUVET İLE İLGİLİ BİLGİLER
+  hacimTipi             String? // New
   hacim                 String? // m3, select options
   kasaUzunlugu          String?
   kasaGenisligi         String?
   kasaYuksekligi        String?
-  sacKalinliklari       String? // Combined thickness field
+  sacKalinliklari       String? // Deprecated in frontend
+  kuvetTabanSacKalinligi String? // New
+  kuvetYanDuvarSacKalinligi String? // New
+  kuvetOnDuvarSacKalinligi String? // New
+  kuvetArkaKapakSacKalinligi String? // New
   damperSacMalzemesi    String?
   arkaKapakTipi         String?
   siperlik              String?
   emniyetKilitlemesi    String?
   brandaTipi            String?
   yagTanki              String?
-  yagTankiMarkasi       String?
+  yagTankiMarkasi       String? // Deprecated in frontend? No, keep logic.
   silindirMarkasi       String?
   silindirTipi          String?
-  kunekTipi             String?
+  kunekTipi             String? // Deprecated in frontend (typo)
+  kurekTipi             String? // New
   govdeEtekSaci         String?
 
   // 03-ŞASİ/YÜRÜYEN İLE İLGİLİ BİLGİLER
+  saseMalzemesi         String? // New
+  dingilTipiVeAdeti     String? // New
   dingilMesafesi        String?
   dingillerArasiMesafe  String?
   besinciTekerYuksekligi String?
-  disUzunluk            String?
-  aracGenisligi         String?
-  aracYuksekligi        String?
+  disUzunluk            String? // Deprecated in frontend
+  aracGenisligi         String? // Deprecated in frontend
+  aracYuksekligi        String? // Deprecated in frontend
   dingilYuku            String?
   kingpinKapasitesi     String?
   mekanikAyak           String?
   elektrikSistemi       String?
   tampon                String?
-  dingilMarkasi         String?
-  dingilSayisi          String?
-  dingilKaldirma        String?
-  dingilKaldirmaKumandasi String?
+  dingilMarkasi         String? // Deprecated in frontend
+  dingilSayisi          String? // Deprecated in frontend
+  dingilKaldirma        String? // Deprecated in frontend
+  dingilKaldirmaKumandasi String? // Deprecated in frontend
   frenSistemi           String?
-  frenSistemiMarkasi    String?
-  guvenlikFrenFonksiyonu String?
+  frenSistemiMarkasi    String? // Deprecated in frontend
+  guvenlikFrenFonksiyonu String? // Deprecated in frontend
   lastikMarkasi         String?
   lastikEbadi           String?
   toplamLastikJantAdeti String?
-  jantMarkasi           String?
-  jantTipi              String?
-  stepneTasiyiciTipi    String?
+  jantMarkasi           String? // Deprecated in frontend
+  jantTipi              String? // Deprecated in frontend
+  stepneTasiyiciTipi    String? // Deprecated in frontend, replaced by stepneTasiyici
+  stepneTasiyici        String? // New
   camurlukTipi          String?
-  camurlukMarkasi       String?
+  camurlukMarkasi       String? // Deprecated in frontend
+  bisikletKorkulugu     String? // New
 
   // 04-DİĞER ÖZELLİKLER
   yanginDolabi          String?

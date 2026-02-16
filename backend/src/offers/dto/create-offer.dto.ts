@@ -21,10 +21,15 @@ export class CreateOfferDto {
     kamyonTeslimTarihi?: Date;
     kamyonTalebi?: string;
     hacim?: string;
+    hacimTipi?: string; // New
     kasaUzunlugu?: string;
     kasaGenisligi?: string;
     kasaYuksekligi?: string;
     sacKalinliklari?: string;
+    kuvetTabanSacKalinligi?: string; // New
+    kuvetYanDuvarSacKalinligi?: string; // New
+    kuvetOnDuvarSacKalinligi?: string; // New
+    kuvetArkaKapakSacKalinligi?: string; // New
     damperSacMalzemesi?: string;
     arkaKapakTipi?: string;
     siperlik?: string;
@@ -35,6 +40,7 @@ export class CreateOfferDto {
     silindirMarkasi?: string;
     silindirTipi?: string;
     kunekTipi?: string;
+    kurekTipi?: string; // New
     govdeEtekSaci?: string;
     dingilMesafesi?: string;
     dingillerArasiMesafe?: string;
@@ -60,8 +66,12 @@ export class CreateOfferDto {
     jantMarkasi?: string;
     jantTipi?: string;
     stepneTasiyiciTipi?: string;
+    stepneTasiyici?: string; // New
     camurlukTipi?: string;
     camurlukMarkasi?: string;
+    saseMalzemesi?: string; // New
+    dingilTipiVeAdeti?: string; // New
+    bisikletKorkulugu?: string; // New
     yanginDolabi?: string;
     dolapTipi?: string;
     suDeposu?: string;
