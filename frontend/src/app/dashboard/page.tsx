@@ -1,4 +1,5 @@
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 
@@ -13,12 +14,16 @@ export default function DashboardPage() {
                     </p>
                 </div>
 
-                <Button asChild size="lg" className="h-16 px-8 text-lg gap-2 bg-blue-600 hover:bg-blue-700">
-                    <Link href="/dashboard/offers/create">
-                        <Plus className="h-6 w-6" />
-                        YENİ TEKLİF OLUŞTUR
-                    </Link>
-                </Button>
+                <Link 
+                    href="/dashboard/offers/create" 
+                    className={cn(
+                        buttonVariants({ variant: "default", size: "lg" }), 
+                        "h-16 px-8 text-lg gap-2 bg-blue-600 hover:bg-blue-700"
+                    )}
+                >
+                    <Plus className="h-6 w-6" />
+                    YENİ TEKLİF OLUŞTUR
+                </Link>
             </div>
         </div>
     );
