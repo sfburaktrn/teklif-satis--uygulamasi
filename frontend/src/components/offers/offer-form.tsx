@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
-import { CalendarIcon, Save, Printer, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { CalendarIcon, Save, Printer, ChevronLeft, ChevronRight, Loader2, FileText } from "lucide-react";
 import Image from "next/image";
 
 import { cn } from "@/lib/utils";
@@ -534,7 +534,7 @@ export default function OfferForm({ initialData, isReadOnly = false }: OfferForm
                     </div>
 
                     {/* FORM CONTENT BASED ON STEP */}
-                    <div className="min-h-[400px]">
+                    <div className="">
                         {currentStep === 1 && <SectionRenderer sectionId="general" />}
                         {currentStep === 2 && <SectionRenderer sectionId="kasa" />}
                         {currentStep === 3 && <SectionRenderer sectionId="sasi" />}
@@ -622,7 +622,23 @@ export default function OfferForm({ initialData, isReadOnly = false }: OfferForm
                                 <ChevronRight className="w-4 h-4 ml-2" />
                             </Button>
                         ) : (
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 items-center">
+                                {/* Export Buttons for Preview Step */}
+                                <div className="mr-4 flex gap-2">
+                                    {initialData?.id ? (
+                                        <>
+                                            <Button variant="outline" type="button" onClick={() => window.open(`/dashboard/offers/${initialData.id}/bom`, '_blank')}>
+                                                <FileText className="mr-2 h-4 w-4" />
+                                                BOM / Raporlar
+                                            </Button>
+                                        </>
+                                    ) : (
+                                        <span className="text-xs text-muted-foreground mr-2 bg-yellow-100 p-1 px-2 rounded border border-yellow-200">
+                                            Raporlar için lütfen önce kaydediniz.
+                                        </span>
+                                    )}
+                                </div>
+
                                 <Button variant="outline" type="button" onClick={() => window.print()}>
                                     <Printer className="mr-2 h-4 w-4" />
                                     Yazdır

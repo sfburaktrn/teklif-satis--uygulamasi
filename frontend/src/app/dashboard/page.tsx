@@ -15,6 +15,7 @@ export default function DashboardPage() {
                 </div>
 
                 <Link 
+                    suppressHydrationWarning
                     href="/dashboard/offers/create" 
                     className={cn(
                         buttonVariants({ variant: "default", size: "lg" }), 

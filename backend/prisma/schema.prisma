@@ -110,3 +110,52 @@ model Offer {
   // Additional Fields
   ozelNotlar            String?
 }
+
+// --------------------------------------
+// BOM (Bill of Materials) & STOCK SYSTEM
+// --------------------------------------
+
+model Product {
+  id            String   @id @default(cuid())
+  
+  // Basic Info
+  name          String   // Malzeme Adı (Örn: "ORTA BACAK")
+  code          String?  @unique // Stok Kodu / Tedarikçi Kodu
+  unit          String   // Birim (Örn: "Adet", "Kg", "Metre")
+  category      String?  // Kategori
+  supplier      String?  // Tedarikçi
+  
+  // Inventory Management
+  currentStock  Float    @default(0)
+  minStockLevel Float    @default(0)
+  price         Float    @default(0)
+  currency      String   @default("TRY") // TRY, USD, EUR
+  
+  // Relations
+  bomRules      BomRule[]
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model BomRule {
+  id            String   @id @default(cuid())
+  
+  // Condition
+  groupName     String?  // Grup (Örn: "HİDROLİK DORSE", "GENEL")
+  
+  // Rule Logic:
+  // If fieldName == "GLOBAL", it applies to ALL orders.
+  // Otherwise, it applies only if Offer[fieldName] == fieldValue.
+  fieldName     String   // Form Alanı (Örn: "arkaKapakTipi" veya "GLOBAL")
+  fieldValue    String?  // Değer (Örn: "Hidrolik" veya null if GLOBAL)
+  
+  // Result
+  productId     String
+  product       Product  @relation(fields: [productId], references: [id])
+  
+  quantity      Float    // Miktar 1 (Adet/Ana Miktar)
+  quantity2     Float?   // Miktar 2 (Kg/Ek Miktar)
+  
+  @@index([fieldName, fieldValue])
+}
