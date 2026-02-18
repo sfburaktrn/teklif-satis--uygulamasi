@@ -66,8 +66,15 @@ export class BomService {
             }
         });
 
+        // Filter for dual-condition rules: if fieldName2 is set, the second condition must also match
+        const filteredRules = rules.filter(rule => {
+            if (!rule.fieldName2) return true; // single condition, already matched
+            const offerValue = (offer as any)[rule.fieldName2];
+            return offerValue != null && offerValue === rule.fieldValue2;
+        });
+
         // 4. Build BOM Lines (each rule = one line, no aggregation)
-        const result: BomItem[] = rules.map((rule, index) => ({
+        const result: BomItem[] = filteredRules.map((rule, index) => ({
             siraNo: index + 1,
             groupName: rule.groupName || 'GENEL',
             productName: rule.product.name,

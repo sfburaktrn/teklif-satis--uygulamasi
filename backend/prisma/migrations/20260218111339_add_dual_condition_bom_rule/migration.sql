@@ -1,0 +1,137 @@
+-- CreateTable
+CREATE TABLE "Offer" (
+    "id" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "teklifNo" TEXT NOT NULL,
+    "satisSorumlusu" TEXT,
+    "siparisCinsi" TEXT,
+    "musteriAdi" TEXT NOT NULL,
+    "yurtIciDisi" TEXT,
+    "musteriTipi" TEXT,
+    "siparisAdeti" INTEGER,
+    "onayTarihi" TIMESTAMP(3),
+    "talepTarihi" TIMESTAMP(3),
+    "tipOnayDurumu" TEXT,
+    "tescilUlkesi" TEXT,
+    "sasiTipi" TEXT,
+    "ustYapiTipi" TEXT,
+    "teslimSekli" TEXT,
+    "kamyonMarkasi" TEXT,
+    "kamyonModeli" TEXT,
+    "kamyonTahrikSistemi" TEXT,
+    "kamyonKabinTipi" TEXT,
+    "kamyonTeslimTarihi" TIMESTAMP(3),
+    "kamyonTalebi" TEXT,
+    "hacimTipi" TEXT,
+    "hacim" TEXT,
+    "kasaUzunlugu" TEXT,
+    "kasaGenisligi" TEXT,
+    "kasaYuksekligi" TEXT,
+    "sacKalinliklari" TEXT,
+    "kuvetTabanSacKalinligi" TEXT,
+    "kuvetYanDuvarSacKalinligi" TEXT,
+    "kuvetOnDuvarSacKalinligi" TEXT,
+    "kuvetArkaKapakSacKalinligi" TEXT,
+    "damperSacMalzemesi" TEXT,
+    "arkaKapakTipi" TEXT,
+    "siperlik" TEXT,
+    "emniyetKilitlemesi" TEXT,
+    "brandaTipi" TEXT,
+    "yagTanki" TEXT,
+    "yagTankiMarkasi" TEXT,
+    "silindirMarkasi" TEXT,
+    "silindirTipi" TEXT,
+    "kunekTipi" TEXT,
+    "kurekTipi" TEXT,
+    "govdeEtekSaci" TEXT,
+    "saseMalzemesi" TEXT,
+    "dingilTipiVeAdeti" TEXT,
+    "dingilMesafesi" TEXT,
+    "dingillerArasiMesafe" TEXT,
+    "besinciTekerYuksekligi" TEXT,
+    "disUzunluk" TEXT,
+    "aracGenisligi" TEXT,
+    "aracYuksekligi" TEXT,
+    "dingilYuku" TEXT,
+    "kingpinKapasitesi" TEXT,
+    "mekanikAyak" TEXT,
+    "elektrikSistemi" TEXT,
+    "tampon" TEXT,
+    "dingilMarkasi" TEXT,
+    "dingilSayisi" TEXT,
+    "dingilKaldirma" TEXT,
+    "dingilKaldirmaKumandasi" TEXT,
+    "frenSistemi" TEXT,
+    "frenSistemiMarkasi" TEXT,
+    "guvenlikFrenFonksiyonu" TEXT,
+    "lastikMarkasi" TEXT,
+    "lastikEbadi" TEXT,
+    "toplamLastikJantAdeti" TEXT,
+    "jantMarkasi" TEXT,
+    "jantTipi" TEXT,
+    "stepneTasiyiciTipi" TEXT,
+    "stepneTasiyici" TEXT,
+    "camurlukTipi" TEXT,
+    "camurlukMarkasi" TEXT,
+    "bisikletKorkulugu" TEXT,
+    "yanginDolabi" TEXT,
+    "dolapTipi" TEXT,
+    "suDeposu" TEXT,
+    "isaretveLevhalar" TEXT,
+    "merdiven" TEXT,
+    "orjinalPto" TEXT,
+    "hidrolikPompa" TEXT,
+    "dengeKolu" TEXT,
+    "cekiSeti" TEXT,
+    "sasiRengi" TEXT,
+    "damperKuvetRengi" TEXT,
+    "brandaRengi" TEXT,
+    "logo" TEXT,
+    "uyariEtiketDili" TEXT,
+    "ozelNotlar" TEXT,
+
+    CONSTRAINT "Offer_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Product" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "code" TEXT,
+    "unit" TEXT NOT NULL,
+    "category" TEXT,
+    "supplier" TEXT,
+    "currentStock" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "minStockLevel" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "price" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "currency" TEXT NOT NULL DEFAULT 'TRY',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Product_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "BomRule" (
+    "id" TEXT NOT NULL,
+    "groupName" TEXT,
+    "fieldName" TEXT NOT NULL,
+    "fieldValue" TEXT,
+    "fieldName2" TEXT,
+    "fieldValue2" TEXT,
+    "productId" TEXT NOT NULL,
+    "quantity" DOUBLE PRECISION NOT NULL,
+    "quantity2" DOUBLE PRECISION,
+
+    CONSTRAINT "BomRule_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Product_code_key" ON "Product"("code");
+
+-- CreateIndex
+CREATE INDEX "BomRule_fieldName_fieldValue_idx" ON "BomRule"("fieldName", "fieldValue");
+
+-- AddForeignKey
+ALTER TABLE "BomRule" ADD CONSTRAINT "BomRule_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

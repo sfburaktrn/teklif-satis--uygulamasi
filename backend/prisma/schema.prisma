@@ -147,8 +147,11 @@ model BomRule {
   // Rule Logic:
   // If fieldName == "GLOBAL", it applies to ALL orders.
   // Otherwise, it applies only if Offer[fieldName] == fieldValue.
+  // If fieldName2 is also set, BOTH conditions must match.
   fieldName     String   // Form Alanı (Örn: "arkaKapakTipi" veya "GLOBAL")
   fieldValue    String?  // Değer (Örn: "Hidrolik" veya null if GLOBAL)
+  fieldName2    String?  // 2. Koşul Alan Adı (Opsiyonel)
+  fieldValue2   String?  // 2. Koşul Değeri (Opsiyonel)
   
   // Result
   productId     String
