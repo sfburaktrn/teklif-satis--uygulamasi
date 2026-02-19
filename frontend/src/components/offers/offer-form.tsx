@@ -65,6 +65,7 @@ export default function OfferForm({ initialData, isReadOnly = false }: OfferForm
     const hacimTipi = form.watch("hacimTipi");
     const dingilTipiVeAdeti = form.watch("dingilTipiVeAdeti");
     const lastikMarkasi = form.watch("lastikMarkasi");
+    const silindirMarkasi = form.watch("silindirMarkasi");
 
     // Multi-step form state
     const [currentStep, setCurrentStep] = useState(1);
@@ -108,6 +109,21 @@ export default function OfferForm({ initialData, isReadOnly = false }: OfferForm
             form.setValue("tescilUlkesi", ""); // Clear selection if it was Türkiye
         }
     }, [yurtIciDisi, form, tescilUlkesi]);
+
+    // Auto-fill Silindir Tipi based on Silindir Markası selection
+    useEffect(() => {
+        if (!silindirMarkasi) return;
+
+        const silindirTipiMap: Record<string, string> = {
+            "Hidromas": "GSH 175-5-5550 C",
+            "Hyva": "FE A169-5-05405",
+        };
+
+        const silindirTipi = silindirTipiMap[silindirMarkasi];
+        if (silindirTipi) {
+            form.setValue("silindirTipi", silindirTipi, { shouldValidate: true, shouldDirty: true, shouldTouch: true });
+        }
+    }, [silindirMarkasi, form]);
 
     // Auto-fill logic for "03-ŞASİ/YÜRÜYEN İLE İLGİLİ BİLGİLER" (Tires)
     useEffect(() => {
@@ -382,6 +398,17 @@ export default function OfferForm({ initialData, isReadOnly = false }: OfferForm
                                                                         form.setValue("kasaUzunlugu", selected.l);
                                                                         form.setValue("kasaGenisligi", selected.w);
                                                                         form.setValue("kasaYuksekligi", selected.h);
+                                                                    }
+                                                                }
+                                                                // Silindir Markası → Silindir Tipi otomatik doldurma
+                                                                if (field.name === "silindirMarkasi") {
+                                                                    const silindirTipiMap: Record<string, string> = {
+                                                                        "Hidromas": "GSH 175-5-5550 C",
+                                                                        "Hyva": "FE A169-5-05405",
+                                                                    };
+                                                                    const mappedTipi = silindirTipiMap[value];
+                                                                    if (mappedTipi) {
+                                                                        form.setValue("silindirTipi", mappedTipi, { shouldValidate: true, shouldDirty: true, shouldTouch: true });
                                                                     }
                                                                 }
                                                             }}
