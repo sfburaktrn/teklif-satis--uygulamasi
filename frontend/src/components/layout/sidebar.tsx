@@ -24,6 +24,11 @@ const sidebarItems = [
         icon: FileText,
     },
     {
+        title: "Ürün Ağacı",
+        href: "/dashboard/bom",
+        icon: Package,
+    },
+    {
         title: "Ayarlar",
         href: "/dashboard/settings",
         icon: Settings,
