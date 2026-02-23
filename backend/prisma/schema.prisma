@@ -109,6 +109,21 @@ model Offer {
 
   // Additional Fields
   ozelNotlar            String?
+
+  // Relations
+  items                 OfferItem[]
+}
+
+model OfferItem {
+  id        String   @id @default(cuid())
+  offerId   String
+  offer     Offer    @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  
+  imalatNo  String   @unique // Örn: IML-OZNL20240201-01
+  status    String?  @default("Bekliyor") // Üretim durumu vb.
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // --------------------------------------

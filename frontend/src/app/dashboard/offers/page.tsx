@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Plus, Search, Filter, Loader2, Trash2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Plus, Search, Filter, Loader2, Trash2, ChevronDown, ChevronRight, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,11 +13,17 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { useEffect, useState } from "react";
 import api from "@/lib/api";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+
+interface OfferItem {
+    id: string;
+    imalatNo: string;
+    status: string;
+}
 
 interface Offer {
     id: string;
@@ -25,11 +32,13 @@ interface Offer {
     createdAt: string;
     satisSorumlusu: string;
     siparisAdeti: number;
+    items?: OfferItem[];
 }
 
 export default function OffersPage() {
     const [offers, setOffers] = useState<Offer[]>([]);
     const [loading, setLoading] = useState(true);
+    const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
 
     const fetchOffers = async () => {
         try {
@@ -59,6 +68,13 @@ export default function OffersPage() {
         }
     };
 
+    const toggleRow = (id: string) => {
+        setExpandedRows(prev => ({
+            ...prev,
+            [id]: !prev[id]
+        }));
+    };
+
     return (
         <div className="space-y-6 p-6">
             <div className="flex items-center justify-between">
@@ -68,12 +84,12 @@ export default function OffersPage() {
                         Tüm tekliflerinizi buradan yönetin.
                     </p>
                 </div>
-                <Link href="/dashboard/offers/create">
-                    <Button>
+                <Button asChild>
+                    <Link href="/dashboard/offers/create">
                         <Plus className="mr-2 h-4 w-4" />
                         Yeni Teklif Oluştur
-                    </Button>
-                </Link>
+                    </Link>
+                </Button>
             </div>
 
             <div className="flex items-center gap-2">
@@ -94,6 +110,7 @@ export default function OffersPage() {
                 <Table>
                     <TableHeader>
                         <TableRow>
+                            <TableHead className="w-[50px]"></TableHead>
                             <TableHead>Teklif No</TableHead>
                             <TableHead>Müşteri</TableHead>
                             <TableHead>Satış Sorumlusu</TableHead>
@@ -105,7 +122,7 @@ export default function OffersPage() {
                     <TableBody>
                         {loading ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="h-24 text-center">
+                                <TableCell colSpan={7} className="h-24 text-center">
                                     <div className="flex items-center justify-center gap-2">
                                         <Loader2 className="h-4 w-4 animate-spin" />
                                         Yükleniyor...
@@ -114,36 +131,74 @@ export default function OffersPage() {
                             </TableRow>
                         ) : offers.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                                <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
                                     Henüz teklif bulunmuyor.
                                 </TableCell>
                             </TableRow>
                         ) : (
                             offers.map((offer) => (
-                                <TableRow key={offer.id}>
-                                    <TableCell className="font-medium">{offer.teklifNo}</TableCell>
-                                    <TableCell>{offer.musteriAdi}</TableCell>
-                                    <TableCell>{offer.satisSorumlusu || "-"}</TableCell>
-                                    <TableCell>{offer.siparisAdeti || "-"}</TableCell>
-                                    <TableCell>
-                                        {format(new Date(offer.createdAt), "d MMMM yyyy", { locale: tr })}
-                                    </TableCell>
-                                    <TableCell className="text-right flex items-center justify-end gap-2">
-                                        <Link href={`/dashboard/offers/${offer.id}`}>
-                                            <Button variant="ghost" size="sm">
-                                                Detay
+                                <React.Fragment key={offer.id}>
+                                    <TableRow className={cn("hover:bg-muted/50 cursor-pointer", expandedRows[offer.id] && "bg-muted/50")} onClick={() => toggleRow(offer.id)}>
+                                        <TableCell>
+                                            <Button variant="ghost" size="icon" className="h-6 w-6">
+                                                {expandedRows[offer.id] ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                                             </Button>
-                                        </Link>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                                            onClick={() => handleDelete(offer.id)}
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
+                                        </TableCell>
+                                        <TableCell className="font-medium">{offer.teklifNo}</TableCell>
+                                        <TableCell>{offer.musteriAdi}</TableCell>
+                                        <TableCell>{offer.satisSorumlusu || "-"}</TableCell>
+                                        <TableCell>{offer.siparisAdeti || "-"}</TableCell>
+                                        <TableCell>
+                                            {format(new Date(offer.createdAt), "d MMMM yyyy", { locale: tr })}
+                                        </TableCell>
+                                        <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                                            <div className="flex items-center justify-end gap-2">
+                                                <Button variant="ghost" size="sm" asChild>
+                                                    <Link href={`/dashboard/offers/${offer.id}`}>
+                                                        Teklif Detayı
+                                                    </Link>
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                                    onClick={() => handleDelete(offer.id)}
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+
+                                    {/* Nested Items Row */}
+                                    {expandedRows[offer.id] && offer.items && offer.items.length > 0 && (
+                                        <TableRow className="bg-muted/20 hover:bg-muted/20">
+                                            <TableCell colSpan={7} className="p-0 border-b-0">
+                                                <div className="pl-14 pr-6 py-4 bg-muted/10 border-t">
+                                                    <h4 className="text-sm font-semibold mb-3 text-muted-foreground">İmalat Kalemleri ({offer.items.length} Adet)</h4>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                                        {offer.items.map(item => (
+                                                            <div key={item.id} className="flex items-center justify-between bg-white border rounded-md p-3 shadow-sm hover:shadow-md transition-shadow">
+                                                                <div>
+                                                                    <div className="font-mono text-sm font-bold text-blue-700">{item.imalatNo}</div>
+                                                                    <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                                                                        Durum: <span className="font-medium text-black px-1.5 py-0.5 bg-gray-100 rounded-sm">{item.status || 'Bekliyor'}</span>
+                                                                    </div>
+                                                                </div>
+                                                                <Button variant="outline" size="sm" className="h-8 text-xs" asChild>
+                                                                    <Link href={`/dashboard/offers/${offer.id}/bom?item=${item.id}`}>
+                                                                        <FileText className="h-3 w-3 mr-1" />
+                                                                        Rapor
+                                                                    </Link>
+                                                                </Button>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </React.Fragment>
                             ))
                         )}
                     </TableBody>
@@ -152,3 +207,4 @@ export default function OffersPage() {
         </div>
     );
 }
+

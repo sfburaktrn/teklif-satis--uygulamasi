@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { CreateOfferDto } from './dto/create-offer.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class OffersService {
@@ -12,11 +13,31 @@ export class OffersService {
             createOfferDto.teklifNo = await this.getNextOfferNumber();
         }
 
+        const quantity = createOfferDto.siparisAdeti && createOfferDto.siparisAdeti > 0 ? createOfferDto.siparisAdeti : 1;
+
+        const data: Prisma.OfferCreateInput = {
+            ...createOfferDto,
+            teklifNo: createOfferDto.teklifNo!, // Ensure it's string
+
+            // Nesting creation for OfferItems
+            items: {
+                create: Array.from({ length: quantity }).map((_, index) => {
+                    // Generate a sequence like -01, -02...
+                    const sequence = String(index + 1).padStart(2, '0');
+                    return {
+                        imalatNo: `IML-${createOfferDto.teklifNo}-${sequence}`,
+                        status: "Bekliyor",
+                    };
+                })
+            }
+        };
+
+        // Create the main offer and its nested items in a single transaction
         return this.prisma.offer.create({
-            data: {
-                ...createOfferDto,
-                teklifNo: createOfferDto.teklifNo!, // Ensure it's string
-            },
+            data,
+            include: {
+                items: true,
+            }
         });
     }
 
@@ -68,6 +89,9 @@ export class OffersService {
         return this.prisma.offer.findMany({
             orderBy: {
                 createdAt: 'desc'
+            },
+            include: {
+                items: true
             }
         });
     }
@@ -75,6 +99,9 @@ export class OffersService {
     async findOne(id: string) {
         return this.prisma.offer.findUnique({
             where: { id },
+            include: {
+                items: true
+            }
         });
     }
 
