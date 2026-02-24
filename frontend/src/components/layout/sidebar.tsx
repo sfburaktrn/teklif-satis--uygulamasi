@@ -9,7 +9,8 @@ import {
     Settings,
     Package,
     Users,
-    LogOut
+    LogOut,
+    Archive
 } from "lucide-react";
 
 const sidebarItems = [
@@ -27,6 +28,11 @@ const sidebarItems = [
         title: "Ürün Ağacı",
         href: "/dashboard/bom",
         icon: Package,
+    },
+    {
+        title: "Stok",
+        href: "/dashboard/stok",
+        icon: Archive,
     },
     {
         title: "Ayarlar",

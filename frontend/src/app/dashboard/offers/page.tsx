@@ -3,7 +3,7 @@
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { Plus, Search, Filter, Loader2, Trash2, ChevronDown, ChevronRight, FileText } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
     Table,
@@ -84,12 +84,10 @@ export default function OffersPage() {
                         Tüm tekliflerinizi buradan yönetin.
                     </p>
                 </div>
-                <Button asChild>
-                    <Link href="/dashboard/offers/create">
-                        <Plus className="mr-2 h-4 w-4" />
-                        Yeni Teklif Oluştur
-                    </Link>
-                </Button>
+                <Link href="/dashboard/offers/create" className={buttonVariants({ variant: "default" })}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Yeni Teklif Oluştur
+                </Link>
             </div>
 
             <div className="flex items-center gap-2">
@@ -153,11 +151,9 @@ export default function OffersPage() {
                                         </TableCell>
                                         <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                                             <div className="flex items-center justify-end gap-2">
-                                                <Button variant="ghost" size="sm" asChild>
-                                                    <Link href={`/dashboard/offers/${offer.id}`}>
-                                                        Teklif Detayı
-                                                    </Link>
-                                                </Button>
+                                                <Link href={`/dashboard/offers/${offer.id}`} className={buttonVariants({ variant: "ghost", size: "sm" })}>
+                                                    Teklif Detayı
+                                                </Link>
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
@@ -185,12 +181,10 @@ export default function OffersPage() {
                                                                         Durum: <span className="font-medium text-black px-1.5 py-0.5 bg-gray-100 rounded-sm">{item.status || 'Bekliyor'}</span>
                                                                     </div>
                                                                 </div>
-                                                                <Button variant="outline" size="sm" className="h-8 text-xs" asChild>
-                                                                    <Link href={`/dashboard/offers/${offer.id}/bom?item=${item.id}`}>
-                                                                        <FileText className="h-3 w-3 mr-1" />
-                                                                        Rapor
-                                                                    </Link>
-                                                                </Button>
+                                                                <Link href={`/dashboard/offers/${offer.id}/bom?item=${item.id}`} className={buttonVariants({ variant: "outline", size: "sm", className: "h-8 text-xs" })}>
+                                                                    <FileText className="h-3 w-3 mr-1" />
+                                                                    Rapor
+                                                                </Link>
                                                             </div>
                                                         ))}
                                                     </div>
