@@ -49,15 +49,15 @@ export default function DashboardPage() {
                     <p className="text-muted-foreground mt-1">Sisteme genel bakış ve operasyonel metrikler.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <Link href="/dashboard/stok" className={buttonVariants({ variant: "outline" })}>
+                    <Link href="/dashboard/stok" suppressHydrationWarning className={buttonVariants({ variant: "outline" })}>
                         <Package className="mr-2 h-4 w-4" />
                         Depoları Gör
                     </Link>
-                    <Link href="/dashboard/offers" className={buttonVariants({ variant: "outline" })}>
+                    <Link href="/dashboard/offers" suppressHydrationWarning className={buttonVariants({ variant: "outline" })}>
                         <FileText className="mr-2 h-4 w-4" />
                         Tüm Teklifler
                     </Link>
-                    <Link href="/dashboard/offers/create" className={buttonVariants({ variant: "default" })}>
+                    <Link href="/dashboard/offers/create" suppressHydrationWarning className={buttonVariants({ variant: "default" })}>
                         <Plus className="mr-2 h-4 w-4" />
                         Yeni Teklif
                     </Link>
@@ -177,7 +177,7 @@ export default function DashboardPage() {
                             <CardTitle>Son Teklifler</CardTitle>
                             <CardDescription>Sisteme girilen en son 5 teklif</CardDescription>
                         </div>
-                        <Link href="/dashboard/offers" className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1 font-medium">
+                        <Link href="/dashboard/offers" suppressHydrationWarning className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1 font-medium">
                             Tümünü Gör <ArrowRight className="h-4 w-4" />
                         </Link>
                     </CardHeader>
