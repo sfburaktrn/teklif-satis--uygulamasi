@@ -177,3 +177,77 @@ model BomRule {
   
   @@index([fieldName, fieldValue])
 }
+
+// --------------------------------------
+// PURCHASING (SATIN ALMA) SYSTEM
+// --------------------------------------
+
+model PurchaseRequest {
+  id              String   @id @default(cuid())
+  requestNo       String   @unique @default(cuid()) // Form/Talep No (Generated or manual)
+  department      String?  // Talep Eden Birim (e.g., Kalite Yönetimi, Kaynak Yönetimi vs)
+  requestType     String?  // Talep Türü (A: Zorunlu, B: Zorunlu Olmayan)
+  requestReason   String?  // Talep Nedeni (1: Yeni Sipariş, 2: Stok, 3: Tamir, 4: Diğer)
+  
+  // Personel Onayları
+  requesterName   String?  // Talep Eden İsim
+  departmentManager String?// Birim Sorumlusu Onayı
+  generalManager  String?  // Genel Müdür Onayı
+
+  status          String   @default("Bekliyor") // Bekliyor, Onaylandı, Reddedildi
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  items           PurchaseRequestItem[]
+}
+
+model PurchaseRequestItem {
+  id              String   @id @default(cuid())
+  requestId       String
+  request         PurchaseRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  
+  // Malzeme Detayları
+  description     String   // Malzeme Tanımı
+  productStatus   String?  // Ürün Durumu (1: Standart, 2: Yeni, 3: Muadil, 4: Satış Şartı)
+  
+  // Miktarlar
+  neededQuantity  Float    // İhtiyaç Miktarı
+  stockQuantity   Float    // Stok Miktarı
+  requestedQuantity Float  // Talep Miktarı
+  approvedQuantity Float?  // Onaylanan Miktar (Patron seçtikten sonra dolar)
+  
+  unit            String   // Ölçü Birimi (Adet, Kg, Mt, vb.)
+  
+  // Seçilen Teklif Bilgileri (Patron onayından sonra dolar)
+  selectedQuoteId String?  @unique
+  selectedQuote   Quote?   @relation("ItemSelectedQuote", fields: [selectedQuoteId], references: [id])
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  quotes          Quote[]  @relation("ItemQuotes")
+}
+
+model Quote {
+  id              String   @id @default(cuid())
+  itemId          String
+  item            PurchaseRequestItem @relation("ItemQuotes", fields: [itemId], references: [id], onDelete: Cascade)
+  
+  // Firma & Teklif Bilgileri
+  supplierName    String   // Firma Adı (Örn: Anadolu Pazarlama, Nevpa)
+  brand           String?  // Marka
+  unitPrice       Float    // Birim Fiyat
+  totalPrice      Float?   // Toplam Fiyat
+  currency        String   @default("TRY") // Para Birimi
+  exchangeRate    Float?   // Döviz Kuru
+  deliveryTime    String?  // Termin Süresi
+  
+  // Seçilim Durumu
+  isSelected      Boolean  @default(false)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  selectedFor     PurchaseRequestItem? @relation("ItemSelectedQuote")
+}

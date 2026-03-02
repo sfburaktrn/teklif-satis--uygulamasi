@@ -10,7 +10,8 @@ import {
     Package,
     Users,
     LogOut,
-    Archive
+    Archive,
+    ShoppingCart
 } from "lucide-react";
 
 const sidebarItems = [
@@ -33,6 +34,11 @@ const sidebarItems = [
         title: "Stok",
         href: "/dashboard/stok",
         icon: Archive,
+    },
+    {
+        title: "Satın Alma",
+        href: "/dashboard/purchase",
+        icon: ShoppingCart,
     },
     {
         title: "Ayarlar",
